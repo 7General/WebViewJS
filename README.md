@@ -25,7 +25,7 @@ pod 'WebViewJavascriptBridge', '~> 5.0.5'
   @property WebViewJavascriptBridge* bridge;
   ```
 3. 初始化`WebView`和`WebViewJavascriptBridge`
-  ```objc
+```objc
     self.webView = [[UIWebView alloc] initWithFrame:self.view.bounds];
     [self.view addSubview:self.webView];
     /**开启日志*/
@@ -33,7 +33,7 @@ pod 'WebViewJavascriptBridge', '~> 5.0.5'
     /**初始化-WebViewJavascriptBridge*/
     self.bridge = [WebViewJavascriptBridge bridgeForWebView:self.webView];
     [self.bridge setWebViewDelegate:self];
-  ```
+```
 #### 3. `JS`调用`OC`代码
 `NOTICE:`我们在写这里的调用代码之前，我们一定要知道`前端js函数`里一定要知道`函数名称`。这个很重要。
 这里我们假设前端有个函数名称是`callViewLoad`他要调用OC的代码给返回来的数据最列表处理。
