@@ -7,9 +7,12 @@
 //
 
 #import "MainViewController.h"
+#import "WebViewJavascriptBridge.h"
 
-@interface MainViewController()
+@interface MainViewController()<UIWebViewDelegate>
 @property (nonatomic, strong) UIWebView * webView;
+
+@property WebViewJavascriptBridge* bridge;
 @end
 
 @implementation MainViewController
@@ -17,41 +20,62 @@
 
 -(void)viewDidLoad {
     [super viewDidLoad];
-    self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 64, 300, 400)];
+    self.webView = [[UIWebView alloc] initWithFrame:self.view.bounds];
     [self.view addSubview:self.webView];
-    
-    
-    
-    NSString * path = [[NSBundle mainBundle] pathForResource:@"ContentHTML.HTML" ofType:nil];
+
+    NSString * path = [[NSBundle mainBundle] pathForResource:@"Content.html" ofType:nil];
     NSURLRequest * quest = [NSURLRequest requestWithURL:[NSURL URLWithString:path]];
     [self.webView loadRequest:quest];
 
+    /**开启日志*/
+    [WebViewJavascriptBridge enableLogging];
+    /**初始化-WebViewJavascriptBridge*/
+    self.bridge = [WebViewJavascriptBridge bridgeForWebView:self.webView];
+    [self.bridge setWebViewDelegate:self];
+    
+    [self makeButton];
+    
+    //********JS调用OC
+    [self.bridge registerHandler:@"callViewLoad" handler:^(id data, WVJBResponseCallback responseCallback) {
+        NSLog(@"前端发送的数据 %@", data);
+        if (responseCallback) {
+            // respons给前端的数据
+            responseCallback(@{@"UName": @"洲洲哥的技术博客",@"URLS":@"http://www.jianshu.com/users/1338683b18e0/latest_articles"});
+        }
+    }];
+    
+    //*******OC调用JS
+//    [self.bridge callHandler:@"UserLoginInfo" data:@{@"name": @"标哥"} responseCallback:^(id responseData) {
+//        NSLog(@"from js: %@", responseData);
+//    }];
+    
 }
 
-- (void)call{    //拨打电话
-    [[UIApplication sharedApplication]
-     openURL:[NSURL URLWithString:@"tel://10086"]];
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    NSLog(@"webViewDidStartLoad");
 }
-//是否允许加载从webview获得的请求/*
-//*该方法可以实现js调用OC
-//*js和OC交互的第三框架可以使用：WebViewJavaScriptBridge
-//*/
-
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
-    //获得html点击的链接
-    NSString *url = request.URL.absoluteString;    //设置协议头
-    NSString *scheme = @"zc://";    //判断获得的链接前面是否包含设置头
-    if([url hasPrefix:scheme]){        //切割字符串
-        NSString *methodName =
-        [url substringFromIndex:scheme.length];
-        //调用打电话的方法
-        
-        [self performSelector:NSSelectorFromString(methodName) withObject:nil];
-        return NO;
-    }else{
-        return YES;
-    }
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    NSLog(@"webViewDidFinishLoad");
 }
 
+-(void)makeButton {
+    UIButton *thisBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    thisBtn.frame = CGRectMake(100, 100, 140, 40);
+    [thisBtn addTarget:self action:@selector(ocCallJS) forControlEvents:UIControlEventTouchUpInside];
+    [thisBtn setTitle:@"点击oc调用js" forState:UIControlStateNormal];
+    [self.view addSubview:thisBtn];
+}
+
+-(void)ocCallJS {
+    // **********OC调用JS
+   //[self.bridge callHandler:@"UserLogin" data:nil];
+    
+    [self.bridge callHandler:@"UserLoginInfo" data:@{@"name": @"标哥"} responseCallback:^(id responseData) {
+        NSLog(@"from js: %@", responseData);
+    }];
+    
+    
+   
+}
 
 @end

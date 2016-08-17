@@ -1,0 +1,42 @@
+
+<html>
+    <head>
+        <title>OC和JS互动Web</title>
+        <script>
+            /*这段代码是固定的，必须要放到js中*/
+            function setupWebViewJavascriptBridge(callback) {
+                if (window.WebViewJavascriptBridge) { return callback(WebViewJavascriptBridge); }
+                if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }
+                window.WVJBCallbacks = [callback];
+                var WVJBIframe = document.createElement('iframe');
+                WVJBIframe.style.display = 'none';
+                WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';
+                document.documentElement.appendChild(WVJBIframe);
+                setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0)
+            }
+        
+        /**与OC交互的所有JS方法都要放在此处注册，才能调用通过JS调用OC或者让OC调用这里的JS*/
+        setupWebViewJavascriptBridge(function(bridge) {
+             /**OC调用JS代码不含参数*/
+             bridge.registerHandler('UserLogin', function() {
+                                    alert('UserLogin')
+             })
+             /**OC调用JS代码含参数*/
+             bridge.registerHandler('UserLoginInfo', function(data, responseCallback) {
+                    responseCallback({'userId': '123456', 'Names': 'ZHOUZHOUGEDEBOKE'})
+            })
+                                     
+             // **********************************JS调用OC
+             bridge.callHandler('callViewLoad', {'blogURL': 'http://www.henishuo.com'}, function(responseCallback){
+                                            alert(responseCallback.UName)
+             })
+            
+                                     
+            
+        })
+    </script>
+    </head>
+    <body>
+        <button style = "background: yellow; height: 50px; width: 100px;">JS/OC互动</button>
+    </body>
+</html>
