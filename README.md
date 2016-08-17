@@ -25,7 +25,7 @@ pod 'WebViewJavascriptBridge', '~> 5.0.5'
   @property WebViewJavascriptBridge* bridge;
   ```
 3. 初始化`WebView`和`WebViewJavascriptBridge`
-  ```paython
+  ```objc
     self.webView = [[UIWebView alloc] initWithFrame:self.view.bounds];
     [self.view addSubview:self.webView];
     /**开启日志*/
